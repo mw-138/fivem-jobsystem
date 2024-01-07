@@ -4,10 +4,8 @@ export abstract class BaseStateMachine<T extends BaseState<number>> {
   protected _states: Map<number, T>;
   protected _currentState: T | undefined;
   protected _updateTick: number;
-  public sharedData: Map<string, any>;
 
   constructor() {
-    this.sharedData = new Map<string, any>();
     this._states = new Map<number, T>();
     this._currentState = undefined;
     this._updateTick = setTick(() => {
