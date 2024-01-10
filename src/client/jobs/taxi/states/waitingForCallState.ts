@@ -13,15 +13,7 @@ export default class WaitingForCallState extends BaseState<TaxiStateEnum> {
 
   onEnter = () => {
     this._state = <TaxiStateMachine>this._stateMachine;
-    showAdvancedNotification(
-      "Keep an eye out for calls.",
-      "Downtown Cab Co.",
-      "Passenger Pickup",
-      2,
-      NotificationPictures.CHAR_TAXI,
-      8,
-      true
-    );
+    this._state.showJobNotification("Keep an eye out for calls.");
   };
 
   onExit = () => {};
@@ -32,9 +24,9 @@ export default class WaitingForCallState extends BaseState<TaxiStateEnum> {
       if (rand < 100) {
         this._stateMachine.setState(TaxiStateEnum.PickingUpPassengers);
       }
-      showSubtitle("Wait for call", 1000);
+      showSubtitle("Wait for a call", 1000);
     } else {
-      showSubtitle("Get into taxi", 1000);
+      showSubtitle("Get into your taxi", 1000);
     }
   };
 }

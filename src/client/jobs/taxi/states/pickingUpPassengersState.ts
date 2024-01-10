@@ -74,16 +74,10 @@ export default class PickingUpPassengersState extends BaseState<TaxiStateEnum> {
     this._pickupPoint = roadSidePoint;
     const [x, y, z] = roadSidePoint;
 
-    showAdvancedNotification(
+    this._state.showJobNotification(
       `${this._civCount} ${
         this._civCount > 1 ? "people" : "person"
-      } need picked up @ ${getFullStreetName(roadSidePoint, true)}.`,
-      "Downtown Cab Co.",
-      "Passenger Pickup",
-      2,
-      NotificationPictures.CHAR_TAXI,
-      8,
-      true
+      } need picked up @ ${getFullStreetName(roadSidePoint, true)}.`
     );
 
     const peds = [];

@@ -7,6 +7,8 @@ import PassengerDeathState from "./states/passengerDeathState";
 import DropOffPassengersState from "./states/dropOffPassengersState";
 import WaitingForPassengersToEnterState from "./states/waitingForPassengersToEnterState";
 import ReturnTaxiState from "./states/returnTaxiState";
+import { NotificationPictures } from "@common/enums";
+import { showAdvancedNotification } from "@common/helpers";
 
 export enum TaxiStateEnum {
   RetrieveTaxi,
@@ -72,5 +74,17 @@ export default class TaxiStateMachine extends BaseStateMachine<
 
   public isOneOrMorePassengersDead(): boolean {
     return this.passengers.some((ped) => IsPedDeadOrDying(ped, true));
+  }
+
+  public showJobNotification(message: string): void {
+    showAdvancedNotification(
+      message,
+      "Downtown Cab Co.",
+      "",
+      2,
+      NotificationPictures.CHAR_TAXI,
+      2,
+      true
+    );
   }
 }

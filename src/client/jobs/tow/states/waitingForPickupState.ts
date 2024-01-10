@@ -12,14 +12,8 @@ export default class WaitingForPickupState extends BaseState<TowStateEnum> {
 
   onEnter = (): void => {
     this._state = <TowStateMachine>this._stateMachine;
-    showAdvancedNotification(
-      "Keep an eye out, you should receive a ping soon.",
-      "Towing Impound Lot",
-      "Vehicle Pickup",
-      2,
-      NotificationPictures.CHAR_PROPERTY_TOWING_IMPOUND,
-      8,
-      true
+    this._state.showJobNotification(
+      "Keep an eye out, you should receive a ping soon."
     );
   };
 
@@ -31,9 +25,7 @@ export default class WaitingForPickupState extends BaseState<TowStateEnum> {
       if (rand < 20) {
         this._stateMachine.setState(TowStateEnum.PickingUpVehicle);
       }
-      showSubtitle("Wait for calls", 1000);
-    } else {
-      showSubtitle("Get back inside your tow truck", 1000);
     }
+    showSubtitle("Wait for a call", 1000);
   };
 }

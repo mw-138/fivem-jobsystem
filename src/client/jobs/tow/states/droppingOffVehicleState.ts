@@ -4,6 +4,8 @@ import {
   showAdvancedNotification,
   isEntityWithinDistanceOfPoint,
   showSubtitle,
+  drawMarker,
+  isWithinDistanceOfPoint,
 } from "@common/helpers";
 import { NotificationPictures } from "@common/enums";
 
@@ -15,15 +17,7 @@ export default class DroppingOffVehicleState extends BaseState<TowStateEnum> {
     this._state = <TowStateMachine>this._stateMachine;
     const [x, y, z] = this._state.truckSpawnCoords;
 
-    showAdvancedNotification(
-      "Now bring the vehicle back in one piece!",
-      "Towing Impound Lot",
-      "Vehicle Pickup",
-      2,
-      NotificationPictures.CHAR_PROPERTY_TOWING_IMPOUND,
-      8,
-      true
-    );
+    this._state.showJobNotification("Now bring the vehicle back in one piece!");
 
     this._dropOffBlip = AddBlipForCoord(x, y, z);
     SetBlipRoute(this._dropOffBlip, true);
@@ -42,6 +36,25 @@ export default class DroppingOffVehicleState extends BaseState<TowStateEnum> {
       this._state.truckSpawnCoords,
       2
     );
+    const shouldDrawMarker = isWithinDistanceOfPoint(
+      this._state.truckSpawnCoords,
+      20
+    );
+
+    if (shouldDrawMarker) {
+      drawMarker(
+        36,
+        this._state.truckSpawnCoords,
+        [0, 0, 0],
+        [0, 0, 0],
+        [0.5, 0.5, 0.5],
+        [0, 150, 255, 255],
+        true,
+        false,
+        true
+      );
+    }
+
     if (withinRangeOfDropOff) {
       const isAttachedToTowTruck = IsVehicleAttachedToTowTruck(
         this._state.truck,
@@ -50,17 +63,11 @@ export default class DroppingOffVehicleState extends BaseState<TowStateEnum> {
       if (!isAttachedToTowTruck) {
         DeleteVehicle(this._state.pickupVehicle);
         this._state.pickupVehicle = 0;
-        showAdvancedNotification(
-          `Here is $${this._state.cashPayout}. Now get back out there!`,
-          "Towing Impound Lot",
-          "Vehicle Pickup",
-          2,
-          NotificationPictures.CHAR_PROPERTY_TOWING_IMPOUND,
-          8,
-          true
+        this._state.showJobNotification(
+          `Here is $${this._state.cashPayout}. Now get back out there!`
         );
         this._state.cashPayout = 0;
-        this._stateMachine.setState(TowStateEnum.ReturningTruck);
+        this._stateMachine.setState(TowStateEnum.WaitingForPickup); // ReturningTruck
       } else {
         showSubtitle("Detatch ~y~vehicle~w~", 1000);
       }

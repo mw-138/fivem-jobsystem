@@ -19,7 +19,7 @@ let currentJobStateMachine: BaseStateMachine<BaseState<number>> | undefined =
 on("onResourceStart", async (name: string) => {
   if (name != GetCurrentResourceName()) return;
 
-  // startJob("bank_truck");
+  startJob("tow");
 });
 
 on("onResourceStop", async (name: string) => {

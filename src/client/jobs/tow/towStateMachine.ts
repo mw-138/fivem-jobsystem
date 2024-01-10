@@ -5,6 +5,8 @@ import PickingUpVehicleState from "./states/pickingUpVehicleState";
 import WaitingForPickupState from "./states/waitingForPickupState";
 import RetreivingTruckState from "./states/retrievingTruckState";
 import ReturningTruckState from "./states/returningTruckState";
+import { NotificationPictures } from "@common/enums";
+import { showAdvancedNotification } from "@common/helpers";
 
 export enum TowStateEnum {
   RetrievingTruck,
@@ -55,5 +57,17 @@ export default class TowStateMachine extends BaseStateMachine<
     if (DoesEntityExist(this.truck)) {
       DeleteVehicle(this.truck);
     }
+  }
+
+  public showJobNotification(message: string): void {
+    showAdvancedNotification(
+      message,
+      "Towing Impound",
+      "",
+      2,
+      NotificationPictures.CHAR_PROPERTY_TOWING_IMPOUND,
+      2,
+      true
+    );
   }
 }

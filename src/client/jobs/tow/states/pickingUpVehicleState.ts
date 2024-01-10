@@ -10,6 +10,7 @@ import {
   isPlayerInVehicle,
   showSubtitle,
   teleportPlayer,
+  getRandomRoadSidePointNearPlayer,
 } from "@common/helpers";
 import { NotificationPictures } from "@common/enums";
 
@@ -51,17 +52,11 @@ export default class PickingUpVehicleState extends BaseState<TowStateEnum> {
   onEnter = async (): Promise<void> => {
     this._state = <TowStateMachine>this._stateMachine;
 
-    showAdvancedNotification(
-      "I have a vehicle for you to pick up. Go to the waypoint on your GPS and bring it back here.",
-      "Towing Impound Lot",
-      "Vehicle Pickup",
-      2,
-      NotificationPictures.CHAR_PROPERTY_TOWING_IMPOUND,
-      8,
-      true
+    this._state.showJobNotification(
+      "I have a vehicle for you to pick up. Go to the waypoint on your GPS and bring it back here."
     );
 
-    const [coords, heading] = getRandomRoadSidePoint(getRandomMapCoord());
+    const [coords, heading] = getRandomRoadSidePointNearPlayer(1000);
     const randVehicle = this.getRandomVehicleModel();
     this._state.pickupVehicle = await spawnVehicle(
       randVehicle.model,
@@ -91,11 +86,12 @@ export default class PickingUpVehicleState extends BaseState<TowStateEnum> {
     if (isPlayerInVehicle(this._state.truck)) {
       const attachedVehicle = GetEntityAttachedToTowTruck(this._state.truck);
       const isPickupVehicleAttached =
-        attachedVehicle === this._state.pickupVehicle;
+        DoesEntityExist(attachedVehicle) &&
+        IsVehicleAttachedToTowTruck(this._state.truck, attachedVehicle);
       if (isPickupVehicleAttached) {
         this._state.setState(TowStateEnum.DroppingOffVehicle);
       } else {
-        showSubtitle("Attach ~y~Vehicle~w~", 1000);
+        showSubtitle("Collect ~y~Vehicle~w~", 1000);
       }
     } else {
       showSubtitle("Pick up ~y~vehicle~w~", 1000);

@@ -15,11 +15,8 @@ export default class ReturningTruckState extends BaseState<TowStateEnum> {
 
   onEnter = (): void => {
     this._state = <TowStateMachine>this._stateMachine;
-    showNotification(
-      `You have ${this._returnDelayInSeconds} seconds to return your vehicle if you wish to stop working.`,
-      2,
-      true,
-      true
+    this._state.showJobNotification(
+      `You have ${this._returnDelayInSeconds} seconds to return your vehicle if you wish to stop working.`
     );
     setTimeout(() => {
       this._stateMachine.setState(TowStateEnum.WaitingForPickup);
