@@ -14,6 +14,7 @@ export default class DropOffPassengersState extends BaseState<TaxiStateEnum> {
   private _state: TaxiStateMachine;
   private _dropOffPoint: number[];
   private _blip: number;
+  private _passengersLeaving: boolean = false;
 
   onEnter = async (): Promise<void> => {
     this._state = <TaxiStateMachine>this._stateMachine;
@@ -24,14 +25,8 @@ export default class DropOffPassengersState extends BaseState<TaxiStateEnum> {
     this._dropOffPoint = roadSidePoint;
     const [x, y, z] = roadSidePoint;
 
-    showAdvancedNotification(
-      `Drop off your passengers @ ${getFullStreetName(roadSidePoint, true)}.`,
-      "Downtown Cab Co.",
-      "Passenger Pickup",
-      2,
-      NotificationPictures.CHAR_TAXI,
-      8,
-      true
+    this._state.showJobNotification(
+      `Drop off your passengers @ ${getFullStreetName(roadSidePoint, true)}.`
     );
 
     this._blip = AddBlipForCoord(x, y, z);
@@ -43,6 +38,7 @@ export default class DropOffPassengersState extends BaseState<TaxiStateEnum> {
       SetBlipRoute(this._blip, false);
       RemoveBlip(this._blip);
     }
+    this._passengersLeaving = false;
   };
 
   onUpdate = async (): Promise<void> => {
@@ -56,32 +52,32 @@ export default class DropOffPassengersState extends BaseState<TaxiStateEnum> {
       this._stateMachine.setState(TaxiStateEnum.PassengerDeath);
     }
     if (withinRangeOfDropOff) {
-      showSubtitle("Stop vehicle", 1000);
+      const hasStopped = IsVehicleStopped(taxi);
+      if (hasStopped) {
+        if (!this._passengersLeaving) {
+          this._passengersLeaving = true;
+          this._state.passengers.forEach((ped) => {
+            TaskLeaveVehicle(ped, taxi, 0);
+            TaskWanderStandard(ped, 10, 10);
+            setTimeout(() => {
+              DeletePed(ped);
+            }, 10000);
+          });
+        }
 
-      this._state.passengers.forEach((ped) => {
-        TaskLeaveVehicle(ped, taxi, 0);
-        TaskWanderStandard(ped, 10, 10);
-        setTimeout(() => {
-          DeletePed(ped);
-        }, 10000);
-      });
-
-      const allPassengersOutOfTaxi = this._state.passengers.every(
-        (ped) => !IsPedInVehicle(ped, taxi, true)
-      );
-      if (allPassengersOutOfTaxi) {
-        showAdvancedNotification(
-          `You have been paid $${this._state.cashPayout}.`,
-          "Downtown Cab Co.",
-          "Passenger Pickup",
-          2,
-          NotificationPictures.CHAR_TAXI,
-          8,
-          true
+        const allPassengersOutOfTaxi = this._state.passengers.every(
+          (ped) => !IsPedInVehicle(ped, taxi, true)
         );
-        this._stateMachine.setState(TaxiStateEnum.WaitingForCall);
+        if (allPassengersOutOfTaxi) {
+          this._state.showJobNotification(
+            `You have been paid $${this._state.cashPayout}.`
+          );
+          this._stateMachine.setState(TaxiStateEnum.WaitingForCall);
+        } else {
+          showSubtitle("Wait for passengers to exit taxi", 1000);
+        }
       } else {
-        showSubtitle("Wait for passengers to exit taxi", 1000);
+        showSubtitle("Stop vehicle", 1000);
       }
     } else {
       showSubtitle("Drive passengers to ~y~destination~w~", 1000);

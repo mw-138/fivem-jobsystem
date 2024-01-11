@@ -11,6 +11,7 @@ import {
   wasInteractJustReleased,
   startProgressBar,
   showSubtitle,
+  teleportPlayer,
 } from "@common/helpers";
 
 export default class RetrieveTaxiState extends BaseState<TaxiStateEnum> {
@@ -36,6 +37,8 @@ export default class RetrieveTaxiState extends BaseState<TaxiStateEnum> {
     const [x, y, z] = GetEntityCoords(this._state.taxiPed, false);
     this._blip = AddBlipForCoord(x, y, z);
     SetBlipRoute(this._blip, true);
+
+    teleportPlayer(this._pedSpawnCoords, this._pedSpawnHeading, false, 500);
   };
 
   onExit = (): void => {
@@ -71,6 +74,7 @@ export default class RetrieveTaxiState extends BaseState<TaxiStateEnum> {
               this._state.taxiSpawnCoords,
               this._taxiSpawnHeading
             );
+            SetVehicleDirtLevel(this._state.taxiVehicle, 0);
             this._stateMachine.setState(TaxiStateEnum.WaitingForCall);
           } else {
             showNotification(
